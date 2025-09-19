@@ -1,18 +1,19 @@
-import React from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import React from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { TabId } from "../types/navigation";
 
 interface BottomNavigationProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
+  activeTab: TabId;
+  onTabChange: (tab: TabId) => void;
 }
 
 export function BottomNavigation({ activeTab, onTabChange }: BottomNavigationProps) {
-  const tabs = [
-    { id: "feed", icon: "home-outline" as const, label: "Feed" },
-    { id: "games", icon: "basketball-outline" as const, label: "Games" },
-    { id: "social", icon: "people-outline" as const, label: "Social" },
-    { id: "profile", icon: "person-circle-outline" as const, label: "Profile" },
+  const tabs: Array<{ id: TabId; icon: keyof typeof Ionicons.glyphMap; label: string }> = [
+    { id: "feed", icon: "home-outline", label: "Feed" },
+    { id: "games", icon: "basketball-outline", label: "Games" },
+    { id: "social", icon: "people-outline", label: "Social" },
+    { id: "profile", icon: "person-circle-outline", label: "Profile" },
   ];
 
   return (
