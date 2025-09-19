@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { FlatList, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import { FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { getGameRepository } from "./api";
 import { ActivityFeed } from "./components/activity-feed.native";
 import { BottomNavigation } from "./components/bottom-navigation.native";
