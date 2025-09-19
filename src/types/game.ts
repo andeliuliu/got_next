@@ -21,6 +21,7 @@ export type GameCreationData = {
   location: string;
   groupId?: string;
   dateISO: string;
+  description?: string;
 };
 
 

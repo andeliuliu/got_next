@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { groupsSeed, locationsSeed } from "../mocks/groups";
 import { GameCreationData } from "../types/game";
 
@@ -66,6 +66,7 @@ export function GameCreationFlow({ isOpen, onClose, onComplete }: GameCreationFl
   const startListRef = useRef<ScrollView | null>(null);
   const endListRef = useRef<ScrollView | null>(null);
   const ITEM_HEIGHT = 40;
+  const [description, setDescription] = useState<string>("");
 
   const canSubmit = useMemo(() => location.trim().length > 0, [location]);
 
@@ -97,18 +98,33 @@ export function GameCreationFlow({ isOpen, onClose, onComplete }: GameCreationFl
     }
   }, [showEndMenu, endTime, times]);
 
+  const toggleMenu = useCallback((menu: "group" | "location" | "calendar" | "start" | "end") => {
+    const next =
+      menu === "group" ? !showGroupMenu :
+      menu === "location" ? !showLocationMenu :
+      menu === "calendar" ? !showCalendar :
+      menu === "start" ? !showStartMenu :
+      !showEndMenu;
+
+    setShowGroupMenu(menu === "group" ? next : false);
+    setShowLocationMenu(menu === "location" ? next : false);
+    setShowCalendar(menu === "calendar" ? next : false);
+    setShowStartMenu(menu === "start" ? next : false);
+    setShowEndMenu(menu === "end" ? next : false);
+  }, [showGroupMenu, showLocationMenu, showCalendar, showStartMenu, showEndMenu]);
+
   return (
     <Modal visible={isOpen} onRequestClose={onClose} animationType="fade" transparent>
       <View style={styles.backdrop}>
         <View style={styles.card}>
-          <ScrollView contentContainerStyle={styles.cardContent}>
+          <View style={styles.cardContent}>
             <Text style={[styles.header, { marginTop: 4 }]}>Create Game</Text>
 
         
 
-        <View style={styles.field}>
+        <View style={[styles.field, showGroupMenu ? styles.fieldRaised : undefined]}>
           <Text style={styles.label}>Group</Text>
-          <Pressable style={styles.input} onPress={() => setShowGroupMenu((v) => !v)}>
+          <Pressable style={styles.input} onPress={() => toggleMenu("group")}>
             <Text style={{ color: "#111827" }}>
               {groupsSeed.find((g) => g.id === selectedGroupId)?.name || "Select group"}
             </Text>
@@ -124,9 +140,9 @@ export function GameCreationFlow({ isOpen, onClose, onComplete }: GameCreationFl
           )}
         </View>
 
-        <View style={styles.field}>
+        <View style={[styles.field, showLocationMenu ? styles.fieldRaised : undefined]}>
           <Text style={styles.label}>Location</Text>
-          <Pressable style={styles.input} onPress={() => setShowLocationMenu((v) => !v)}>
+          <Pressable style={styles.input} onPress={() => toggleMenu("location")}>
             <Text style={{ color: "#111827" }}>{location || "Select location"}</Text>
           </Pressable>
           {showLocationMenu && (
@@ -143,9 +159,9 @@ export function GameCreationFlow({ isOpen, onClose, onComplete }: GameCreationFl
           )}
         </View>
 
-        <View style={styles.field}>
+        <View style={[styles.field, showCalendar ? styles.fieldRaised : undefined]}>
           <Text style={styles.label}>Date</Text>
-          <Pressable style={styles.input} onPress={() => setShowCalendar((v) => !v)}>
+          <Pressable style={styles.input} onPress={() => toggleMenu("calendar")}>
             <Text style={{ color: "#111827" }}>
               {selectedDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
             </Text>
@@ -200,9 +216,9 @@ export function GameCreationFlow({ isOpen, onClose, onComplete }: GameCreationFl
         <View style={styles.divider} />
 
         <View style={styles.row}>
-          <View style={[styles.field, styles.flex1]}>
+          <View style={[styles.field, styles.flex1, showStartMenu ? styles.fieldRaised : undefined]}>
             <Text style={styles.label}>Start time</Text>
-            <Pressable style={styles.input} onPress={() => setShowStartMenu((v) => !v)}>
+            <Pressable style={styles.input} onPress={() => toggleMenu("start")}>
               <Text style={{ color: "#111827" }}>{startTime}</Text>
             </Pressable>
             {showStartMenu && (
@@ -218,9 +234,9 @@ export function GameCreationFlow({ isOpen, onClose, onComplete }: GameCreationFl
             )}
           </View>
 
-          <View style={[styles.field, styles.flex1]}>
+          <View style={[styles.field, styles.flex1, showEndMenu ? styles.fieldRaised : undefined]}>
             <Text style={styles.label}>End time</Text>
-            <Pressable style={styles.input} onPress={() => setShowEndMenu((v) => !v)}>
+            <Pressable style={styles.input} onPress={() => toggleMenu("end")}>
               <Text style={{ color: "#111827" }}>{endTime}</Text>
             </Pressable>
             {showEndMenu && (
@@ -235,6 +251,17 @@ export function GameCreationFlow({ isOpen, onClose, onComplete }: GameCreationFl
               </View>
             )}
           </View>
+        </View>
+
+        <View style={styles.field}>
+          <Text style={styles.label}>Description (optional)</Text>
+          <TextInput
+            style={[styles.input, { minHeight: 80, textAlignVertical: "top" }]}
+            placeholder="Add a note for friends..."
+            multiline
+            value={description}
+            onChangeText={setDescription}
+          />
         </View>
 
             <View style={[styles.actions, { justifyContent: "center", marginTop: 16 }]}>
@@ -254,16 +281,18 @@ export function GameCreationFlow({ isOpen, onClose, onComplete }: GameCreationFl
                     endTime,
                     dateISO: new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString(),
                     groupId: selectedGroupId ?? undefined,
+                    description: description.trim() || undefined,
                   });
                   onClose();
                   setSelectedGroupId(groupsSeed[0]?.id ?? null);
                   setLocation(locationsSeed[0] ?? "");
+                  setDescription("");
                 }}
               >
                 <Text style={[styles.buttonText, styles.buttonPrimaryText]}>Create</Text>
               </Pressable>
             </View>
-          </ScrollView>
+          </View>
         </View>
       </View>
     </Modal>
@@ -272,11 +301,12 @@ export function GameCreationFlow({ isOpen, onClose, onComplete }: GameCreationFl
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", alignItems: "center", justifyContent: "center", padding: 16 },
-  card: { width: "100%", maxWidth: 420, maxHeight: "85%", backgroundColor: "#ffffff", borderRadius: 12, overflow: "hidden" },
-  cardContent: { padding: 16, gap: 12 },
+  card: { width: "100%", maxWidth: 420, maxHeight: "85%", backgroundColor: "#ffffff", borderRadius: 12, overflow: "visible" },
+  cardContent: { padding: 20, gap: 12 },
   container: { flex: 1, backgroundColor: "#ffffff", padding: 16, gap: 12 },
   header: { fontSize: 18, fontWeight: "700", color: "#111827" },
-  field: { gap: 6 },
+  field: { gap: 6, position: "relative" },
+  fieldRaised: { zIndex: 1000, elevation: 10 },
   label: { fontSize: 13, color: "#6b7280" },
   input: { borderWidth: StyleSheet.hairlineWidth, borderColor: "#e5e7eb", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 10, fontSize: 14, color: "#111827" },
   row: { flexDirection: "row", gap: 10 },
@@ -289,13 +319,13 @@ const styles = StyleSheet.create({
   buttonDisabled: { backgroundColor: "#e5e7eb" },
   buttonText: { fontSize: 14, fontWeight: "600" },
   buttonPrimaryText: { color: "#ffffff" },
-  menu: { borderWidth: StyleSheet.hairlineWidth, borderColor: "#e5e7eb", borderRadius: 8, backgroundColor: "#ffffff", marginTop: 6 },
+  menu: { position: "absolute", top: "100%", left: 0, right: 0, marginTop: 4, borderWidth: StyleSheet.hairlineWidth, borderColor: "#e5e7eb", borderRadius: 8, backgroundColor: "#ffffff", maxHeight: 240, zIndex: 1000, elevation: 10, shadowColor: "#000000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 8 },
   menuItem: { paddingHorizontal: 10, paddingVertical: 10 },
-  menuItemText: { color: "#111827", fontSize: 14 },
+  menuItemText: { color: "#111827", fontSize: 14, marginHorizontal: 4 },
   menuItemTextActive: { color: "#1d4ed8", fontWeight: "600" },
   addNew: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: "#e5e7eb" },
   divider: { height: 1, backgroundColor: "#e5e7eb", marginVertical: 8 },
-  calendarContainer: { borderWidth: StyleSheet.hairlineWidth, borderColor: "#e5e7eb", borderRadius: 8, padding: 10, backgroundColor: "#ffffff", gap: 8 },
+  calendarContainer: { position: "absolute", top: "100%", left: 0, right: 0, marginTop: 4, borderWidth: StyleSheet.hairlineWidth, borderColor: "#e5e7eb", borderRadius: 8, padding: 10, backgroundColor: "#ffffff", gap: 8, zIndex: 1000, elevation: 10, shadowColor: "#000000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 8 },
   calendarHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   navBtn: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6, backgroundColor: "#f3f4f6" },
   navBtnText: { color: "#111827", fontSize: 12, fontWeight: "600" },
