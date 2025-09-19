@@ -17,11 +17,10 @@ export class MockGameRepository implements GameRepository {
     const newGame: Game = {
       id: `game-${Date.now()}`,
       title: input.title,
-      date: formatShortDate(new Date()),
-      time: input.time,
+      date: formatShortDate(new Date(input.dateISO)),
+      time: `${input.startTime} - ${input.endTime}`,
       location: input.location,
       participants: [],
-      maxPlayers: input.maxPlayers,
       status: "upcoming",
       isJoined: true,
     };
@@ -42,7 +41,6 @@ export class MockGameRepository implements GameRepository {
         { id: "2", name: "Maya Patel" },
         { id: "3", name: "Chris Johnson" },
       ],
-      maxPlayers: 10,
       status: "upcoming",
       isJoined: true,
     };

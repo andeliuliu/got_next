@@ -12,7 +12,7 @@ export function BottomNavigation({ activeTab, onTabChange }: BottomNavigationPro
   const tabs: Array<{ id: TabId; icon: keyof typeof Ionicons.glyphMap; label: string }> = [
     { id: "feed", icon: "home-outline", label: "Feed" },
     { id: "games", icon: "basketball-outline", label: "Games" },
-    { id: "social", icon: "people-outline", label: "Social" },
+    { id: "friends", icon: "people-outline", label: "Friends" },
     { id: "profile", icon: "person-circle-outline", label: "Profile" },
   ];
 

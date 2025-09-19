@@ -1,17 +1,16 @@
-import React from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import React from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 interface QuickActionsProps {
   onCreateNewGame: () => void;
+  onCreateNewGroup: () => void;
 }
 
-export function QuickActions({ onCreateNewGame }: QuickActionsProps) {
+export function QuickActions({ onCreateNewGame, onCreateNewGroup }: QuickActionsProps) {
   const items = [
+    { id: "group", label: "Create Group", icon: "people-circle-outline" as const, onPress: onCreateNewGroup },
     { id: "create", label: "Create Game", icon: "add-circle-outline" as const, onPress: onCreateNewGame },
-    { id: "schedule", label: "Schedule", icon: "calendar-outline" as const },
-    { id: "friends", label: "Find Friends", icon: "people-outline" as const },
-    { id: "courts", label: "Find Courts", icon: "map-outline" as const },
   ];
 
   return (

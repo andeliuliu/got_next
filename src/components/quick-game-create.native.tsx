@@ -1,10 +1,9 @@
-import React, { useMemo, useState } from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import React, { useMemo, useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 interface QuickGameCreateProps {
   onCreateGame: (groupId: string, time: string) => void;
-  onCreateNewGroup: () => void;
 }
 
 type QuickGroup = {
@@ -49,7 +48,7 @@ const mockQuickGroups: QuickGroup[] = [
   },
 ];
 
-export function QuickGameCreate({ onCreateGame, onCreateNewGroup }: QuickGameCreateProps) {
+export function QuickGameCreate({ onCreateGame }: QuickGameCreateProps) {
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const selectedGroup = useMemo(
     () => mockQuickGroups.find((g) => g.id === selectedGroupId) || null,
@@ -87,10 +86,6 @@ export function QuickGameCreate({ onCreateGame, onCreateNewGroup }: QuickGameCre
               </View>
             </Pressable>
           ))}
-          <Pressable style={styles.createTile} onPress={onCreateNewGroup}>
-            <Ionicons name="add-circle-outline" size={18} color="#2563eb" />
-            <Text style={styles.createTileText}>Create New Group</Text>
-          </Pressable>
         </View>
       ) : (
         <View style={styles.detailCard}>

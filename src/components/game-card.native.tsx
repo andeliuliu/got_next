@@ -1,6 +1,6 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 
 interface GameCardProps {
   id: string;
@@ -9,13 +9,11 @@ interface GameCardProps {
   time: string;
   location: string;
   participants: Array<{ id: string; name: string; avatar?: string }>;
-  maxPlayers: number;
   status: "upcoming" | "live" | "completed";
   isJoined: boolean;
 }
 
-export function GameCard({ title, date, time, location, participants, maxPlayers, status, isJoined }: GameCardProps) {
-  const spotsLeft = maxPlayers - participants.length;
+export function GameCard({ title, date, time, location, participants, status, isJoined }: GameCardProps) {
 
   return (
     <View style={styles.card}>
@@ -52,13 +50,11 @@ export function GameCard({ title, date, time, location, participants, maxPlayers
       <View style={styles.footerRow}>
         <View style={styles.row}>
           <Ionicons name="people-outline" size={16} color="#6b7280" />
-          <Text style={styles.metaText}>{participants.length}/{maxPlayers}</Text>
+          <Text style={styles.metaText}>{participants.length}</Text>
         </View>
         {!isJoined && status === "upcoming" ? (
-          <View style={[styles.joinPill, spotsLeft > 0 ? styles.joinPillActive : styles.joinPillDisabled]}>
-            <Text style={[styles.joinText, spotsLeft > 0 ? styles.joinTextActive : styles.joinTextDisabled]}>
-              {spotsLeft > 0 ? `Join (${spotsLeft} left)` : "Full"}
-            </Text>
+          <View style={[styles.joinPill, styles.joinPillActive]}>
+            <Text style={[styles.joinText, styles.joinTextActive]}>Join</Text>
           </View>
         ) : null}
       </View>

@@ -1,3 +1,3 @@
-export type TabId = "feed" | "games" | "social" | "profile";
+export type TabId = "feed" | "games" | "friends" | "profile";
 
 

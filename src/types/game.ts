@@ -10,16 +10,17 @@ export type Game = {
   time: string;
   location: string;
   participants: Participant[];
-  maxPlayers: number;
   status: "upcoming";
   isJoined: boolean;
 };
 
 export type GameCreationData = {
   title: string;
-  time: string;
+  startTime: string;
+  endTime: string;
   location: string;
-  maxPlayers: number;
+  groupId?: string;
+  dateISO: string;
 };
 
 

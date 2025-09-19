@@ -40,8 +40,8 @@ export default function AppNative() {
         return "Basketball Feed";
       case "games":
         return "Games";
-      case "social":
-        return "Social";
+      case "friends":
+        return "Friends";
       case "profile":
         return "Profile";
       default:
@@ -82,12 +82,9 @@ export default function AppNative() {
             contentContainerStyle={styles.contentScroll}
             ListHeaderComponent={
               <View>
-                <QuickGameCreate
-                  onCreateGame={handleCreateQuickGame}
-                  onCreateNewGroup={handleOpenGameCreation}
-                />
+                <QuickGameCreate onCreateGame={handleCreateQuickGame} />
                 <View style={{ height: 8 }} />
-                <QuickActions onCreateNewGame={handleOpenGameCreation} />
+                <QuickActions onCreateNewGroup={handleOpenGameCreation} onCreateNewGame={handleOpenGameCreation} />
                 <View style={{ height: 8 }} />
                 <Text style={styles.sectionTitle}>Upcoming Games</Text>
               </View>
@@ -97,7 +94,7 @@ export default function AppNative() {
         ) : (
           <ScrollView contentContainerStyle={styles.contentScroll}>
             {activeTab === "feed" && <ActivityFeed />}
-            {activeTab === "social" && <SocialTab />}
+            {activeTab === "friends" && <SocialTab />}
             {activeTab === "profile" && (
               <View style={styles.centeredBox}>
                 <Text style={styles.heading}>Profile</Text>
