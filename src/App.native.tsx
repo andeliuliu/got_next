@@ -8,7 +8,6 @@ import { GameCard } from "./components/game-card.native";
 import { GameCreationFlow } from "./components/game-creation-flow.native";
 import { Header } from "./components/header.native";
 import { QuickActions } from "./components/quick-actions.native";
-import { QuickGameCreate } from "./components/quick-game-create.native";
 import { SocialTab } from "./components/social-tab.native";
 import { Game, GameCreationData } from "./types/game";
 import { TabId } from "./types/navigation";
@@ -71,26 +70,53 @@ export default function AppNative() {
     setGames((prev) => [created, ...prev]);
   }, [repo]);
 
+  const now = new Date();
+  const upcomingGames = useMemo(() => games.filter((g) => new Date(g.startISO) >= now), [games, now]);
+  const recentGames = useMemo(() => games.filter((g) => new Date(g.startISO) < now), [games, now]);
+
   return (
     <SafeAreaView style={styles.rootSafeArea}>
       <View style={styles.root}>
         <Header title={pageTitle} showNotifications={activeTab === "feed"} />
         {activeTab === "games" ? (
-          <FlatList
-            data={games}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.contentScroll}
-            ListHeaderComponent={
-              <View>
-                <QuickGameCreate onCreateGame={handleCreateQuickGame} />
-                <View style={{ height: 8 }} />
-                <QuickActions onCreateNewGroup={handleOpenGameCreation} onCreateNewGame={handleOpenGameCreation} />
-                <View style={{ height: 8 }} />
-                <Text style={styles.sectionTitle}>Upcoming Games</Text>
-              </View>
-            }
-            renderItem={({ item }) => <GameCard {...item} />}
-          />
+          <View style={styles.gamesPage}>
+            <View style={styles.sectionTop}>
+              <Text style={styles.sectionTitle}>Upcoming Games</Text>
+              <FlatList
+                data={upcomingGames}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => <GameCard {...item} />}
+                contentContainerStyle={upcomingGames.length === 0 ? styles.emptyListContent : styles.sectionListContent}
+                style={{ flex: 1 }}
+                ListEmptyComponent={
+                  <View style={styles.emptyState}> 
+                    <Text style={styles.emptyText}>No upcoming games, gotta run it up!</Text>
+                  </View>
+                }
+              />
+            </View>
+
+            <View style={styles.sectionMiddle}>
+              <QuickActions onCreateNewGroup={handleOpenGameCreation} onCreateNewGame={handleOpenGameCreation} />
+            </View>
+
+            <View style={styles.sectionBottom}>
+              <Text style={styles.sectionTitle}>Most Recent Games</Text>
+              <FlatList
+                data={recentGames}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <View style={{ marginBottom: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: "#e5e7eb", borderRadius: 10, padding: 12, backgroundColor: "#ffffff" }}>
+                    <Text style={{ fontSize: 16, fontWeight: "600", color: "#111827", marginBottom: 6 }}>{item.title}</Text>
+                    <Text style={{ fontSize: 13, color: "#6b7280" }}>{item.time}</Text>
+                    <Text style={{ fontSize: 13, color: "#6b7280", marginTop: 6 }}>{item.location}</Text>
+                  </View>
+                )}
+                contentContainerStyle={styles.sectionListContent}
+                style={{ flex: 1 }}
+              />
+            </View>
+          </View>
         ) : (
           <ScrollView contentContainerStyle={styles.contentScroll}>
             {activeTab === "feed" && <ActivityFeed />}
@@ -129,6 +155,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     paddingBottom: 88,
+  },
+  gamesPage: { flex: 1 },
+  sectionTop: { flex: 42, paddingHorizontal: 16, paddingTop: 16 },
+  sectionMiddle: { flex: 16, paddingHorizontal: 16, justifyContent: "center" },
+  sectionBottom: { flex: 42, paddingHorizontal: 16, paddingBottom: 16 },
+  sectionListContent: { paddingBottom: 8 },
+  emptyListContent: { flexGrow: 1, justifyContent: "center" },
+  emptyState: { alignItems: "center", justifyContent: "center", paddingVertical: 16 },
+  emptyText: { color: "#6b7280", fontSize: 14, textAlign: "center" },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: "#e5e7eb",
+    marginBottom: 12,
   },
   centeredBox: {
     alignItems: "center",

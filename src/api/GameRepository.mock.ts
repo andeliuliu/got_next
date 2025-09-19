@@ -1,6 +1,6 @@
 import { upcomingGamesSeed } from "../mocks/games";
 import { Game, GameCreationData } from "../types/game";
-import { formatShortDate } from "../utils/datetime";
+import { formatShortDate, parseTimeLabelToDate } from "../utils/datetime";
 import { GameRepository } from "./GameRepository";
 
 export class MockGameRepository implements GameRepository {
@@ -14,6 +14,8 @@ export class MockGameRepository implements GameRepository {
 
   async createGame(input: GameCreationData): Promise<Game> {
     await new Promise((r) => setTimeout(r, 50));
+    const start = parseTimeLabelToDate(input.dateISO, input.startTime);
+    const end = parseTimeLabelToDate(input.dateISO, input.endTime);
     const newGame: Game = {
       id: `game-${Date.now()}`,
       title: input.title,
@@ -23,6 +25,9 @@ export class MockGameRepository implements GameRepository {
       participants: [],
       status: "upcoming",
       isJoined: true,
+      startISO: start.toISOString(),
+      endISO: end.toISOString(),
+      groupId: input.groupId,
     };
     this.games = [newGame, ...this.games];
     return newGame;
@@ -43,6 +48,9 @@ export class MockGameRepository implements GameRepository {
       ],
       status: "upcoming",
       isJoined: true,
+      startISO: new Date().toISOString(),
+      endISO: new Date().toISOString(),
+      groupId,
     };
     this.games = [newGame, ...this.games];
     return newGame;

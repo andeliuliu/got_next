@@ -12,6 +12,9 @@ export type Game = {
   participants: Participant[];
   status: "upcoming";
   isJoined: boolean;
+  startISO: string;
+  endISO: string;
+  groupId?: string;
 };
 
 export type GameCreationData = {
