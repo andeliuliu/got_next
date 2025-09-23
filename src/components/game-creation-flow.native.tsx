@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
   field: { gap: 6, position: "relative" },
   fieldRaised: { zIndex: 1000, elevation: 10 },
   label: { fontSize: 13, color: "#6b7280" },
-  input: { borderWidth: StyleSheet.hairlineWidth, borderColor: "#e5e7eb", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 10, fontSize: 14, color: "#111827" },
+  input: { borderWidth: StyleSheet.hairlineWidth, borderColor: "#e5e7eb", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 10, fontSize: 14, color: "#374151", backgroundColor: "#f3f4f6" },
   row: { flexDirection: "row", gap: 10 },
   flex1: { flex: 1 },
   actions: { flexDirection: "row", justifyContent: "flex-end", gap: 10, marginTop: 8 },

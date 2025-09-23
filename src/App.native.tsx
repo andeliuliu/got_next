@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
+import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getGameRepository } from "./api";
 import { ActivityFeed } from "./components/activity-feed.native";
 import { BottomNavigation } from "./components/bottom-navigation.native";
 import { GameCard } from "./components/game-card.native";
 import { GameCreationFlow } from "./components/game-creation-flow.native";
+import { GroupCreationFlow } from "./components/group-creation-flow.native";
 import { Header } from "./components/header.native";
 import { QuickActions } from "./components/quick-actions.native";
 import { SocialTab } from "./components/social-tab.native";
@@ -19,7 +20,9 @@ import { TabId } from "./types/navigation";
 export default function AppNative() {
   const [activeTab, setActiveTab] = useState<TabId>("feed");
   const [showGameCreation, setShowGameCreation] = useState(false);
+  const [showGroupCreation, setShowGroupCreation] = useState(false);
   const [games, setGames] = useState<Game[]>([]);
+  const [gamesTab, setGamesTab] = useState<"upcoming" | "recent">("upcoming");
 
   const repo = useMemo(() => getGameRepository(), []);
 
@@ -71,52 +74,36 @@ export default function AppNative() {
   }, [repo]);
 
   const now = new Date();
-  const upcomingGames = useMemo(() => games.filter((g) => new Date(g.startISO) >= now), [games, now]);
-  const recentGames = useMemo(() => games.filter((g) => new Date(g.startISO) < now), [games, now]);
+  const upcomingGames = useMemo(() => games.filter((g) => g.startISO ? new Date(g.startISO) >= now : true), [games, now]);
+  const recentGames = useMemo(() => games.filter((g) => g.startISO ? new Date(g.startISO) < now : false), [games, now]);
 
   return (
     <SafeAreaView style={styles.rootSafeArea}>
       <View style={styles.root}>
         <Header title={pageTitle} showNotifications={activeTab === "feed"} />
         {activeTab === "games" ? (
-          <View style={styles.gamesPage}>
-            <View style={styles.sectionTop}>
-              <Text style={styles.sectionTitle}>Upcoming Games</Text>
-              <FlatList
-                data={upcomingGames}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => <GameCard {...item} />}
-                contentContainerStyle={upcomingGames.length === 0 ? styles.emptyListContent : styles.sectionListContent}
-                style={{ flex: 1 }}
-                ListEmptyComponent={
-                  <View style={styles.emptyState}> 
-                    <Text style={styles.emptyText}>No upcoming games, gotta run it up!</Text>
-                  </View>
-                }
-              />
-            </View>
-
-            <View style={styles.sectionMiddle}>
-              <QuickActions onCreateNewGroup={handleOpenGameCreation} onCreateNewGame={handleOpenGameCreation} />
-            </View>
-
-            <View style={styles.sectionBottom}>
-              <Text style={styles.sectionTitle}>Most Recent Games</Text>
-              <FlatList
-                data={recentGames}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                  <View style={{ marginBottom: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: "#e5e7eb", borderRadius: 10, padding: 12, backgroundColor: "#ffffff" }}>
-                    <Text style={{ fontSize: 16, fontWeight: "600", color: "#111827", marginBottom: 6 }}>{item.title}</Text>
-                    <Text style={{ fontSize: 13, color: "#6b7280" }}>{item.time}</Text>
-                    <Text style={{ fontSize: 13, color: "#6b7280", marginTop: 6 }}>{item.location}</Text>
-                  </View>
-                )}
-                contentContainerStyle={styles.sectionListContent}
-                style={{ flex: 1 }}
-              />
-            </View>
-          </View>
+          <FlatList
+            data={gamesTab === "upcoming" ? upcomingGames : recentGames}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => <GameCard {...item} />}
+            contentContainerStyle={styles.contentScroll}
+            ListHeaderComponent={
+              <View>
+                <View style={styles.tabsRow}>
+                  <Pressable style={[styles.tabButton, gamesTab === "upcoming" ? styles.tabButtonActive : undefined]} onPress={() => setGamesTab("upcoming")}>
+                    <Text style={[styles.tabLabel, gamesTab === "upcoming" ? styles.tabLabelActive : undefined]}>Upcoming</Text>
+                  </Pressable>
+                  <Pressable style={[styles.tabButton, gamesTab === "recent" ? styles.tabButtonActive : undefined]} onPress={() => setGamesTab("recent")}>
+                    <Text style={[styles.tabLabel, gamesTab === "recent" ? styles.tabLabelActive : undefined]}>Recent</Text>
+                  </Pressable>
+                </View>
+                <View style={{ height: 8 }} />
+                <QuickActions onCreateNewGroup={() => setShowGroupCreation(true)} onCreateNewGame={handleOpenGameCreation} />
+                <View style={{ height: 8 }} />
+                <Text style={styles.sectionTitle}>{gamesTab === "upcoming" ? "Upcoming Games" : "Most Recent Games"}</Text>
+              </View>
+            }
+          />
         ) : (
           <ScrollView contentContainerStyle={styles.contentScroll}>
             {activeTab === "feed" && <ActivityFeed />}
@@ -136,6 +123,12 @@ export default function AppNative() {
           isOpen={showGameCreation}
           onClose={handleCloseGameCreation}
           onComplete={handleGameCreationComplete}
+        />
+
+        <GroupCreationFlow
+          isOpen={showGroupCreation}
+          onClose={() => setShowGroupCreation(false)}
+          onComplete={() => setShowGroupCreation(false)}
         />
       </View>
     </SafeAreaView>
@@ -157,13 +150,11 @@ const styles = StyleSheet.create({
     paddingBottom: 88,
   },
   gamesPage: { flex: 1 },
-  sectionTop: { flex: 42, paddingHorizontal: 16, paddingTop: 16 },
-  sectionMiddle: { flex: 16, paddingHorizontal: 16, justifyContent: "center" },
-  sectionBottom: { flex: 42, paddingHorizontal: 16, paddingBottom: 16 },
-  sectionListContent: { paddingBottom: 8 },
-  emptyListContent: { flexGrow: 1, justifyContent: "center" },
-  emptyState: { alignItems: "center", justifyContent: "center", paddingVertical: 16 },
-  emptyText: { color: "#6b7280", fontSize: 14, textAlign: "center" },
+  tabsRow: { flexDirection: "row", gap: 8 },
+  tabButton: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, backgroundColor: "#f3f4f6" },
+  tabButtonActive: { backgroundColor: "#dbeafe" },
+  tabLabel: { fontSize: 13, color: "#6b7280", fontWeight: "600" },
+  tabLabelActive: { color: "#1d4ed8" },
   divider: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: "#e5e7eb",
